@@ -1,6 +1,6 @@
-import Navbar from "../components/Navbar";
-import "./globals.css";
-import { AuthProvider } from "../context/AuthContext";
+import Navbar from '@/components/Navbar';
+import './globals.css';
+import { AuthProvider } from '@/context/AuthContext';
 
 export const metadata = {
   title: "Eventify",

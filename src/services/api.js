@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: 'http://localhost:8080/api/v1',
+  withCredentials: true,
 });
 
 /**
@@ -38,7 +39,7 @@ export const getEventById = async (id) => {
 export const loginUser = async (credentials) => {
   try {
     const response = await api.post('/auth/users/login', credentials);
-    return response.data;
+    return response.data.data;
   } catch (error) {
     console.error('Error logging in:', error);
     throw error;
@@ -55,6 +56,32 @@ export const registerUser = async (userData) => {
     return response.data;
   } catch (error) {
     console.error('Error registering user:', error);
+    throw error;
+  }
+};
+
+/**
+ * @returns {Promise<any>}
+ */
+export const getCurrentUser = async () => {
+  try {
+    const response = await api.get('/users/me');
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching current user:', error);
+    throw error;
+  }
+};
+
+/**
+ * @returns {Promise<any>}
+ */
+export const logoutUser = async () => {
+  try {
+    const response = await api.post('/auth/users/logout');
+    return response.data;
+  } catch (error) {
+    console.error('Error logging out:', error);
     throw error;
   }
 };

@@ -1,6 +1,13 @@
 import Link from 'next/link';
 import { getAllEvents } from '@/services/api';
 
+const getImageUrl = (imageUrls) => {
+  if (imageUrls && imageUrls.length > 0) {
+    return imageUrls[0];
+  }
+  return 'https://via.placeholder.com/300x200.png?text=No+Image'; // Placeholder image
+};
+
 async function HomePage() {
   let events = [];
   let error = null;
@@ -20,7 +27,7 @@ async function HomePage() {
         {events.map((event) => (
           <Link href={`/events/${event.id}`} key={event.id}>
             <div className="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300">
-              <img src={event.imageUrls[0]} alt={event.name} className="w-full h-48 object-cover" />
+              <img src={getImageUrl(event.imageUrls)} alt={event.name} className="w-full h-48 object-cover" />
               <div className="p-4">
                 <h2 className="text-xl font-semibold mb-2">{event.name}</h2>
                 <p className="text-gray-600">{event.venue}</p>

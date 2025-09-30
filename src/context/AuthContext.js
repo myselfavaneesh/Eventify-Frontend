@@ -1,9 +1,8 @@
-"use client";
+'use client';
 
-import { createContext, useContext, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { loginUser, registerUser } from "../services/api";
-import axios from "axios";
+import { createContext, useContext, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { loginUser, registerUser, getCurrentUser, logoutUser } from '@/services/api';
 
 const AuthContext = createContext();
 
@@ -15,10 +14,8 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:8080/api/v1/users/me"
-        );
-        setUser(response.data.data);
+        const currentUser = await getCurrentUser();
+        setUser(currentUser);
       } catch (error) {
         setUser(null);
       } finally {
@@ -31,11 +28,11 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await loginUser({ email, password });
-      setUser(response.data);
-      router.push("/");
+      const userData = await loginUser({ email, password });
+      setUser(userData);
+      router.push('/');
     } catch (error) {
-      console.error("Login failed:", error);
+      console.error('Login failed:', error);
       throw error;
     }
   };
@@ -44,14 +41,19 @@ export const AuthProvider = ({ children }) => {
     try {
       await registerUser(userData);
     } catch (error) {
-      console.error("Registration failed:", error);
+      console.error('Registration failed:', error);
       throw error;
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    router.push("/");
+  const logout = async () => {
+    try {
+      await logoutUser();
+      setUser(null);
+      router.push('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   return (
