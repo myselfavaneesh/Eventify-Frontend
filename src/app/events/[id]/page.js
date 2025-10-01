@@ -1,22 +1,61 @@
-import { getEventById } from '@/services/api';
+'use client';
 
-async function EventDetailsPage({ params }) {
-  const { id } = params;
-  let event = null;
-  let error = null;
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { getEventById, createBooking } from '@/services/api';
+import { useAuth } from '@/context/AuthContext';
+import SeatLayout from '@/components/SeatSelection';
 
-  try {
-    event = await getEventById(id);
-  } catch (err) {
-    error = err.message;
-  }
+export default function EventDetailsPage() {
+  const { id } = useParams();
+  const router = useRouter();
+  const { user } = useAuth();
+  const [event, setEvent] = useState(null);
+  const [error, setError] = useState(null);
+  const [showSeatLayout, setShowSeatLayout] = useState(false);
+
+  useEffect(() => {
+    const fetchEvent = async () => {
+      try {
+        const eventData = await getEventById(id);
+        setEvent(eventData);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+    fetchEvent();
+  }, [id]);
+
+  const handleBookingConfirm = async ({ selectedSeatIds }) => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+
+    try {
+      await createBooking({ eventId: event.id, seatIds: selectedSeatIds });
+      alert('Booking successful!');
+      router.push('/my-bookings');
+    } catch (err) {
+      setError('Booking failed. Please try again.');
+      console.error(err);
+    }
+  };
+
+  const handleBookTicketClick = () => {
+    if (!user) {
+      router.push('/login');
+    } else {
+      setShowSeatLayout(true);
+    }
+  };
 
   if (error) {
     return <p className="text-red-500 text-center py-8">{error}</p>;
   }
 
   if (!event) {
-    return <p className="text-center py-8">Event not found.</p>;
+    return <p className="text-center py-8">Loading event details...</p>;
   }
 
   return (
@@ -25,7 +64,11 @@ async function EventDetailsPage({ params }) {
         <div className="grid grid-cols-1 md:grid-cols-2">
           <div>
             {event.imageUrls && event.imageUrls.length > 0 && (
-              <img src={event.imageUrls[0]} alt={event.name} className="w-full h-full object-cover" />
+              <img
+                src={event.imageUrls[0]}
+                alt={event.name}
+                className="w-full h-full object-cover"
+              />
             )}
           </div>
           <div className="p-8">
@@ -38,17 +81,22 @@ async function EventDetailsPage({ params }) {
               <span className="font-semibold">Venue:</span> {event.venue}
             </div>
             <div className="mb-4">
-              <span className="font-semibold">Date:</span> {new Date(event.eventTimestamp).toLocaleDateString()}
+              <span className="font-semibold">Date:</span>{" "}
+              {new Date(event.eventTimestamp).toLocaleDateString()}
             </div>
-            {/* Seat Selection UI will go here */}
-            <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition-colors duration-300">
-              Book Now
-            </button>
+            {showSeatLayout ? (
+              <SeatLayout event={event} onConfirm={handleBookingConfirm} />
+            ) : (
+              <button
+                onClick={handleBookTicketClick}
+                className="w-full px-6 py-3 bg-blue-500 text-white font-bold rounded-lg shadow-md hover:bg-blue-600"
+              >
+                Book Tickets
+              </button>
+            )}
           </div>
         </div>
       </div>
     </div>
   );
 }
-
-export default EventDetailsPage;

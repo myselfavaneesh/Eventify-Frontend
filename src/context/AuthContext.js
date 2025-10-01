@@ -1,8 +1,13 @@
-'use client';
+"use client";
 
-import { createContext, useContext, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { loginUser, registerUser, getCurrentUser, logoutUser } from '@/services/api';
+import { createContext, useContext, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import {
+  loginUser,
+  registerUser,
+  getCurrentUser,
+  logoutUser,
+} from "@/services/api";
 
 const AuthContext = createContext();
 
@@ -15,6 +20,7 @@ export const AuthProvider = ({ children }) => {
     const fetchUser = async () => {
       try {
         const currentUser = await getCurrentUser();
+        console.log(currentUser.userType);
         setUser(currentUser);
       } catch (error) {
         setUser(null);
@@ -30,9 +36,9 @@ export const AuthProvider = ({ children }) => {
     try {
       const userData = await loginUser({ email, password });
       setUser(userData);
-      router.push('/');
+      router.push("/");
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error("Login failed:", error);
       throw error;
     }
   };
@@ -41,7 +47,7 @@ export const AuthProvider = ({ children }) => {
     try {
       await registerUser(userData);
     } catch (error) {
-      console.error('Registration failed:', error);
+      console.error("Registration failed:", error);
       throw error;
     }
   };
@@ -50,9 +56,9 @@ export const AuthProvider = ({ children }) => {
     try {
       await logoutUser();
       setUser(null);
-      router.push('/');
+      router.push("/");
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error("Logout failed:", error);
     }
   };
 
